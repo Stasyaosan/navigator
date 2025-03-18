@@ -10,6 +10,23 @@ async def handler(websocket):
     clients.add(websocket)
 
     try:
+        with open('json/data.json') as f:
+            schedules = json.loads(f.read())
+            new_schedules = {}
+            for time, data in schedules.items():
+                res = ''
+                a = time.split(':')
+                if len(a[0]) == 1:
+                    res += '0' + a[0] + ':'
+                else:
+                    res += a[0] + ':'
+                if len(a[1]) == 1:
+                    res += '0' + a[1]
+                else:
+                    res += a[1]
+                new_schedules[res] = data
+            schedules = dict(sorted(new_schedules.items()))
+
         await websocket.send(json.dumps({"action": "init", "schedules": schedules}))
 
         async for message in websocket:

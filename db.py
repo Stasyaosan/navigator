@@ -28,6 +28,7 @@ class DB:
                 self.cursor.execute('''
                                     create table if not exists schedule(
                                     id int auto_increment primary key,
+                                    day_of_week text,
                                     time text,
                                     format text,
                                     class text,
@@ -49,9 +50,15 @@ class DB:
         return json.loads(str_json)
 
     def save(self):
+        self.connect()
+        self.cursor.execute('delete from schedule')
+        self.connection.commit()
         for time, data in self.get_from_json().items():
-            print(time, data)
+            d = (data[0].split('_')[1], time, data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8],
+                 data[9],)
+            self.cursor.execute(
+                'insert into schedule (day_of_week, time, format, class, students, subject, teacher, cabinet, link, teacher_z, link_z) values (?,?,?,?,?,?,?,?,?,?,?)', d)
 
 
 db = DB()
-db.connect()
+db.save()

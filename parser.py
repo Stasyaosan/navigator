@@ -18,6 +18,7 @@ for i in links_global:
     format_1 = []
 
     driver.get(i)
+    day_of_week = driver.title.split(' - ')[1]
     scroll_global = 0
 
 
@@ -37,7 +38,7 @@ for i in links_global:
         WebDriverWait(driver, 100).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "#viewContainer"))
         )
-        day_of_week = driver.find_elements(By.CLASS_NAME, 'top-bar-text-light-primary-hover-forced')[0].text
+        # day_of_week = driver.find_elements(By.CLASS_NAME, 'top-bar-text-light-primary-hover-forced')[0].text
 
         new = []
         count = 0
@@ -82,7 +83,7 @@ for i in links_global:
                     # ])
                 else:
                     nnn_dict[ni[ini + 1]] = [
-                        ni[ini], ni[ini + 2], ni[ini + 3], ni[ini + 4], ni[ini + 5], ni[ini + 6], ni[ini + 7],
+                        day_of_week, ni[ini], ni[ini + 2], ni[ini + 3], ni[ini + 4], ni[ini + 5], ni[ini + 6], ni[ini + 7],
                         ni[ini + 8], ni[ini + 9]
                     ]
         open('json/data.json', 'w').write(json.dumps(nnn_dict))
