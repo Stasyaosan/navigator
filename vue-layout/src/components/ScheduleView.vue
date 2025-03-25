@@ -1,7 +1,37 @@
 <template>
-  <div>
+  <nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">8a</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+
+          <li class="nav-item">
+            <a class="nav-link" @click="loadSchedule('8а_пн')" href="#">Понедельник</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" @click="loadSchedule('8а_вт')" href="#">Вторник</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" @click="loadSchedule('8а_ср')" href="#">Среда</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" @click="loadSchedule('8а_чт')" href="#">Четверг</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" @click="loadSchedule('8а_пт')" href="#">Пятница</a>
+          </li>
+
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <div class=" m-auto" v-if="error == null">
     <h1 class="text-center mb-4">Расписание</h1>
-    <div class="row justify-content-center" style="width: 100%;">
+    <div class="row justify-content-left" style="width: 100%">
       <div v-for="(schedule, key) in schedules" :key="key" class="col-2 border m-3 p-3">
         <div @click="openModal(schedule)">
           <div class="text-lowercase fw-bold">Форма</div>
@@ -35,11 +65,14 @@
 
           <div v-if="schedule[9]">
             <div class="text-lowercase fw-bold">Ссылка на замену</div>
-            <div>{{ trunsText(schedule[9]) }}</div>
+            <div><a :href="schedule[9]">{{ trunsText(schedule[9]) }}</a></div>
           </div>
         </div>
       </div>
     </div>
+  </div>
+  <div class=" m-auto" v-if="error != null">
+    <h1 class="text-center alert alert-danger fs-5 mb-4">{{ error }}</h1>
   </div>
 
   <div class="modal fade " :class="{ show: isModalOpen }" tabindex="-1"
@@ -72,21 +105,22 @@
             <div>{{ selectedItem ? selectedItem[6] : '' }}</div>
 
             <div class="text-lowercase fw-bold">Ссылка на подключения</div>
-            <div><a href="#">{{ selectedItem ? selectedItem[7] : '' }}</a></div>
+            <div><a href="#">{{ selectedItem ? trunsText(selectedItem[7]) : '' }}</a></div>
+
+            <div class="text-lowercase fw-bold">Учитель на замену</div>
+            <div>{{ selectedItem ? selectedItem[8] : '' }}</div>
+
+            <div class="text-lowercase fw-bold">Ссылка на замену</div>
+            <div>{{ selectedItem ? trunsText(selectedItem[9]) : '' }}</div>
 
             <div v-if="selectedItem">
-              <div v-if="selectedItem[8]">
-                <div class="text-lowercase fw-bold">Учитель на замену</div>
-                <div>{{ selectedItem ? selectedItem[8] : '' }}</div>
-              </div>
-
               <div v-if="selectedItem[9]">
-                <div class="text-lowercase fw-bold">Ссылка на замену</div>
-                <div>{{ selectedItem ? selectedItem[9] : '' }}</div>
+
+                <div class="text-lowercase fw-bold">Учитель на замену</div>
+                <div>{{ selectedItem[9] }}</div>
               </div>
             </div>
           </div>
-
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @click="closeModal">Закрыть</button>
@@ -104,7 +138,8 @@ export default {
       schedules: [],
       socket: null,
       isModalOpen: false,
-      selectedItem: null
+      selectedItem: null,
+      error: null
     };
   },
   methods: {
@@ -117,11 +152,29 @@ export default {
     openModal(schedule) {
       this.selectedItem = schedule;
       this.isModalOpen = true;
-      console.log(this.selectedItem);
     },
     closeModal() {
       this.isModalOpen = false;
       this.selectedItem = null;
+    },
+    loadSchedule(d) {
+      const data = {
+        'day': d,
+        'action': 'day_of_week'
+      };
+      const data_json = JSON.stringify(data);
+      this.socket.send(data_json);
+      this.socket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.action == 'init') {
+          if (data.error == '0') {
+            this.schedules = data.schedules;
+            this.error = null;
+          } else {
+            this.error = 'Расписание не найдено';
+          }
+        }
+      };
     }
   },
   created() {
@@ -130,7 +183,6 @@ export default {
     this.socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
       if (data.action == 'init' || data.action == 'update') {
-        console.log(data.schedules);
         this.schedules = data.schedules;
       }
     };
