@@ -111,7 +111,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'ru-ru'
 
-TIME_ZONE = 'Moscow/Europe'
+TIME_ZONE = 'Europe/Moscow'
 
 USE_I18N = True
 
@@ -122,8 +122,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
-
-MEDIA_URL = 'media/'
+STATIC_ROOT = 'static'
 
 ASGI_APPLICATION = 'navigator.asgi.application'
 

@@ -1,5 +1,8 @@
 from django.shortcuts import render
+from .add_data import ImportToModel
 
 
-def schedule(request, room_name):
-    return render(request, 'schedule.html', {'room_name': room_name})
+def update_schedule(request):
+    i = ImportToModel()
+    import asyncio
+    asyncio.run(i.import_data_async())
