@@ -88,6 +88,6 @@ for i in links_global:
                         day_of_week, ni[ini], ni[ini + 2], ni[ini + 3], ni[ini + 4], ni[ini + 5], ni[ini + 6], ni[ini + 7],
                         ni[ini + 8], ni[ini + 9]
                     ]
-        open(f'json/{day_of_week}.json', 'w').write(json.dumps(nnn_dict))
+        open(f'navigator/app/json/{day_of_week}.json', 'w').write(json.dumps(nnn_dict))
     except:
         pass

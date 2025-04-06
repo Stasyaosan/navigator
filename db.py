@@ -46,7 +46,7 @@ class DB:
             print(f'Ошибка подключения к MySQL: {e}')
 
     def get_from_json(self):
-        str_json = open('json/data.json', 'r').read()
+        str_json = open('navigator/app/json/data.json', 'r').read()
         return json.loads(str_json)
 
     def save(self):

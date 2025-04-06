@@ -11,7 +11,7 @@ async def handler(websocket):
     clients.add(websocket)
 
     try:
-        with open('json/data.json') as f:
+        with open('navigator/app/json/data.json') as f:
             schedules = json.loads(f.read())
             new_schedules = {}
             for time, data in schedules.items():
@@ -33,10 +33,10 @@ async def handler(websocket):
         async for message in websocket:
             data = json.loads(message)
             if data['action'] == 'day_of_week':
-                if not os.path.exists(f'json/{data['day']}.json'):
+                if not os.path.exists(f'navigator/app/json/{data['day']}.json'):
                     await websocket.send(json.dumps({"action": "init", "schedules": '', 'error': '1'}))
                 try:
-                    with open(f'json/{data['day']}.json') as f:
+                    with open(f'navigator/app/json/{data['day']}.json') as f:
                         schedules = json.loads(f.read())
                         new_schedules = {}
                         for time, data in schedules.items():
