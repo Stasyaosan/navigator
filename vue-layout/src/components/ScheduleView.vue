@@ -178,7 +178,7 @@ export default {
     }
   },
   created() {
-    this.socket = new WebSocket("ws://localhost:8765");
+    this.socket = new WebSocket("ws://localhost:8001/ws/schedule/");
 
     this.socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
