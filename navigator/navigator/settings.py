@@ -142,7 +142,7 @@ CELERY_TIMEZONE = 'Europe/Moscow'
 CELERY_BEAT_SCHEDULE = {
     'update-weather-every-hour': {
         'task': 'app.tasks.update_schedule',
-        'schedule': 60.0,  # Каждый час (в секундах)
+        'schedule': 120,  # Каждый час (в секундах)
         # Можно использовать также:
         # 'schedule': crontab(minute=0, hour='*/1'),  # Каждый час в 00 минут
     },
