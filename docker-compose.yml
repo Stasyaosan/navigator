@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3.12'
 
 services:
   redis:
@@ -6,65 +6,80 @@ services:
     ports:
       - "6379:6379"
     healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
+      test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
-  db:
-    image: mysql:8.0
     volumes:
-      - mysql_data:/var/lib/mysql
+      - redis_data:/data
+
+  db:
+    image: postgres:15
+    container_name: postgres_db
+    restart: always
+    shm_size: 128mb
     environment:
-      MYSQL_DATABASE: navigator_new
-      MYSQL_ROOT_PASSWORD: Av4936754
-      MYSQL_ROOT_HOST: '%'
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     ports:
-      - "3307:3306"
+      - "5432:5432"
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
-      timeout: 20s
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
       retries: 10
 
-
   web:
+    image: django
+    container_name: django_web
     build: .
-    command: daphne -b 0.0.0.0 -p 8000 navigator.asgi:application
-    volumes:
-      - .:/app
+    restart: on-failure
+    tty: true
+    command: bash -c "python manage.py makemigrations && python manage.py migrate && daphne -b 0.0.0.0 -p 8000 navigator.asgi:application"
     ports:
-      - "8001:8000"
+      - "8000:8000"
+    volumes:
+      - .:/workapp
     depends_on:
-      - redis
-      - db
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
-      - DJANGO_SETTINGS_MODULE=navigator.navigator.settings
-      - CELERY_BROKER_URL=redis://redis:6379/0
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/postgres
+      - REDIS_URL=redis://redis:6379/0
 
   celery:
-    build: .
-    command: celery -A navigator worker --loglevel=info
-    volumes:
-      - .:/app
-    depends_on:
-      - redis
-      - db
-    environment:
-      - DJANGO_SETTINGS_MODULE=navigator.navigator.settings
-      - CELERY_BROKER_URL=redis://redis:6379/0
+      build: .
+      command: bash -c "python manage.py migrate && celery -A navigator worker --loglevel=info && python manage.py runserver 0.0.0.0:8001"
+      volumes:
+        - .:/workapp
+      depends_on:
+        db:
+          condition: service_healthy
+        redis:
+          condition: service_healthy
+      environment:
+        - DJANGO_SETTINGS_MODULE=navigator.settings
+        - CELERY_BROKER_URL=redis://redis:6379/0
 
   celery-beat:
     build: .
-    command: celery -A navigator beat --loglevel=info
+    command: bash -c "python manage.py migrate && celery -A navigator beat --loglevel=info"
     volumes:
       - .:/app
     depends_on:
-      - redis
-      - db
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
-      - DJANGO_SETTINGS_MODULE=navigator.navigator.settings
+      - DJANGO_SETTINGS_MODULE=navigator.settings
       - CELERY_BROKER_URL=redis://redis:6379/0
 
-
-
 volumes:
-  mysql_data:
+  redis_data:
+  postgres_data:

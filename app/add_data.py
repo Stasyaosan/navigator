@@ -26,6 +26,7 @@ class ImportToModel:
     def _save_schedule(self, time, data_schedule):
         schedule = Schedule()
 
+
         schedule.time = time
         schedule.day_of_week = data_schedule[0].split('_')[1]
 
