@@ -6,3 +6,4 @@ from .parser import parser
 def update_schedule():
     print('Задача выполняется')
     parser()
+    print('Задача выполнена')

@@ -3,25 +3,33 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import re
+from selenium.webdriver.chrome.options import Options
+
 from time import sleep
 import json
+from selenium import webdriver
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+
 
 def parser():
-    links_global = ['https://airtable.com/appcJGGcLssocnsot/shrlFJPOUmBnedWAQ/tblk1iBDpqhztUBO8','https://airtable.com/appcJGGcLssocnsot/shrtHbsTEmWJm4ZwN/tblk1iBDpqhztUBO8']
+    links_global = ['https://airtable.com/appcJGGcLssocnsot/shrlFJPOUmBnedWAQ/tblk1iBDpqhztUBO8',
+                    'https://airtable.com/appcJGGcLssocnsot/shrtHbsTEmWJm4ZwN/tblk1iBDpqhztUBO8']
     new_data_json = []
-    driver = webdriver.Chrome()
-    for i in links_global:
-        times = []
-        teachers = []
-        subs = []
-        links = []
-        cabinets = []
-        format_1 = []
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.add_argument('--headless')
+    chrome_options.add_argument('--no-sandbox')
+    chrome_options.add_argument('--disable-dev-shm-usage')
 
+    driver = webdriver.Remote(
+        command_executor='http://chrome:4444/wd/hub',
+        options=chrome_options
+    )
+    # driver = webdriver.Chrome()
+    for i in links_global:
         driver.get(i)
         day_of_week = driver.title.split(' - ')[1]
+        print(day_of_week)
         scroll_global = 0
-
 
         def scroll_down():
             view_container = driver.find_element(By.CLASS_NAME, 'light-scrollbar')
@@ -34,17 +42,16 @@ def parser():
             sleep(1)
             return c_h, ht
 
-
         try:
             WebDriverWait(driver, 100).until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, "#viewContainer"))
             )
-            #day_of_week = driver.find_elements(By.CLASS_NAME, 'top-bar-text-light-primary-hover-forced')[0].text
+            # day_of_week = driver.find_elements(By.CLASS_NAME, 'top-bar-text-light-primary-hover-forced')[0].text
 
             new = []
             count = 0
-            #div_title = driver.find_elements(By.TAG_NAME, 'title')
-            #for el in div_title:
+            # div_title = driver.find_elements(By.TAG_NAME, 'title')
+            # for el in div_title:
             #    print(el.)
 
             while True:
@@ -87,9 +94,10 @@ def parser():
                         pass
                     else:
                         nnn_dict[ni[ini + 1]] = [
-                            day_of_week, ni[ini], ni[ini + 2], ni[ini + 3], ni[ini + 4], ni[ini + 5], ni[ini + 6], ni[ini + 7],
+                            day_of_week, ni[ini], ni[ini + 2], ni[ini + 3], ni[ini + 4], ni[ini + 5], ni[ini + 6],
+                            ni[ini + 7],
                             ni[ini + 8], ni[ini + 9]
                         ]
-            open(f'navigator/app/json/{day_of_week}.json', 'w').write(json.dumps(nnn_dict))
+            open(f'/workapp/app/json/{day_of_week}.json', 'w').write(json.dumps(nnn_dict))
         except:
             pass

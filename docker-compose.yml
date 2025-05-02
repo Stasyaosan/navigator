@@ -1,6 +1,21 @@
 version: '3.12'
 
 services:
+  chrome:
+    image: selenium/standalone-chrome:latest
+    ports:
+      - "4444:4444"
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 2G
+    healthcheck:
+      test: [ 'CMD', 'curl','-f','http://localhost:4444/wd/hub/status' ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   redis:
     image: redis:alpine
     ports:
@@ -38,7 +53,7 @@ services:
     build: .
     restart: on-failure
     tty: true
-    command: bash -c "python manage.py makemigrations && python manage.py migrate && daphne -b 0.0.0.0 -p 8000 navigator.asgi:application"
+    command: bash -c "python manage.py makemigrations && python manage.py migrate && daphne -b 0.0.0.0 -p 8000 navigator.asgi:application  "
     ports:
       - "8000:8000"
     volumes:
@@ -48,38 +63,45 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      chrome:
+        condition: service_healthy
     environment:
       - DATABASE_URL=postgres://postgres:postgres@db:5432/postgres
       - REDIS_URL=redis://redis:6379/0
+      - SELENIUM_REMOTE_URL=http://chrome:4444/wd/hub
 
   celery:
-      build: .
-      command: bash -c "python manage.py migrate && celery -A navigator worker --loglevel=info && python manage.py runserver 0.0.0.0:8001"
-      volumes:
-        - .:/workapp
-      depends_on:
-        db:
-          condition: service_healthy
-        redis:
-          condition: service_healthy
-      environment:
-        - DJANGO_SETTINGS_MODULE=navigator.settings
-        - CELERY_BROKER_URL=redis://redis:6379/0
-
-  celery-beat:
     build: .
-    command: bash -c "python manage.py migrate && celery -A navigator beat --loglevel=info"
+    command: bash -c "python manage.py migrate && celery -A navigator worker --loglevel=info"
     volumes:
-      - .:/app
+      - .:/workapp
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_healthy
+      chrome:
+        condition: service_healthy
     environment:
       - DJANGO_SETTINGS_MODULE=navigator.settings
       - CELERY_BROKER_URL=redis://redis:6379/0
-
+      - SELENIUM_REMOTE_URL=http://chrome:4444/wd/hub
+  celery-beat:
+    build: .
+    command: bash -c "python manage.py migrate && celery -A navigator beat --loglevel=info"
+    volumes:
+      - .:/workapp
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      chrome:
+        condition: service_healthy
+    environment:
+      - DJANGO_SETTINGS_MODULE=navigator.settings
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - SELENIUM_REMOTE_URL=http://chrome:4444/wd/hub
 volumes:
   redis_data:
   postgres_data:
