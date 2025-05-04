@@ -1,5 +1,6 @@
-#import django
-#django.setup()
+import django
+
+django.setup()
 from .models import Schedule
 from django.db.models import Q
 import os
@@ -8,9 +9,7 @@ from channels.db import database_sync_to_async
 import os
 
 
-
 class ImportToModel:
-
     dir_import = 'app/json'
 
     @database_sync_to_async
@@ -25,7 +24,6 @@ class ImportToModel:
     @database_sync_to_async
     def _save_schedule(self, time, data_schedule):
         schedule = Schedule()
-
 
         schedule.time = time
         schedule.day_of_week = data_schedule[0].split('_')[1]

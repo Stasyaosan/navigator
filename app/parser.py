@@ -8,13 +8,15 @@ from selenium.webdriver.chrome.options import Options
 from time import sleep
 import json
 from selenium import webdriver
+from .models import Link
+import django
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 
 def parser():
-    links_global = ['https://airtable.com/appcJGGcLssocnsot/shrlFJPOUmBnedWAQ/tblk1iBDpqhztUBO8',
-                    'https://airtable.com/appcJGGcLssocnsot/shrtHbsTEmWJm4ZwN/tblk1iBDpqhztUBO8']
-    new_data_json = []
+    django.setup()
+    li = Link.objects.all()
+    links_global = []
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_argument('--headless')
     chrome_options.add_argument('--no-sandbox')

@@ -14,7 +14,10 @@ class Schedule(models.Model):
     replace_teacher = models.CharField(max_length=244)
     replace_link = models.CharField(max_length=244)
 
-
     def __str__(self):
         return f'{self.day_of_week} {self.class_room} {self.time}'
 
+
+class Link(models.Model):
+    name = models.CharField(max_length=100, verbose_name='День недели')
+    link = models.URLField(verbose_name='Ссылка на расписание')
