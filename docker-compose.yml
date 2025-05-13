@@ -86,6 +86,7 @@ services:
       - DJANGO_SETTINGS_MODULE=navigator.settings
       - CELERY_BROKER_URL=redis://redis:6379/0
       - SELENIUM_REMOTE_URL=http://chrome:4444/wd/hub
+
   celery-beat:
     build: .
     command: bash -c "python manage.py migrate && celery -A navigator beat --loglevel=info"
@@ -102,6 +103,21 @@ services:
       - DJANGO_SETTINGS_MODULE=navigator.settings
       - CELERY_BROKER_URL=redis://redis:6379/0
       - SELENIUM_REMOTE_URL=http://chrome:4444/wd/hub
+
+  frontend:
+    image: node:16
+    container_name: vue_frontend
+    working_dir: /workapp
+    volumes:
+      - .:/workapp
+    ports:
+      - "8082:8082"
+    environment:
+      - NODE_ENV=development
+    command: bash -c "cd frontend && npm run serve"
+    depends_on:
+      - web
+
 volumes:
   redis_data:
   postgres_data:

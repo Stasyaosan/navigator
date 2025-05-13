@@ -8,15 +8,19 @@ from selenium.webdriver.chrome.options import Options
 from time import sleep
 import json
 from selenium import webdriver
-from .models import Link
 import django
+
+django.setup()
+from .models import Link
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 
 def parser():
     django.setup()
-    li = Link.objects.all()
+    ll = Link.objects.all()
     links_global = []
+    for q in ll:
+        links_global.append(q.link)
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_argument('--headless')
     chrome_options.add_argument('--no-sandbox')
