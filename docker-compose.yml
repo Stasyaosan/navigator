@@ -114,7 +114,7 @@ services:
       - "8082:8082"
     environment:
       - NODE_ENV=development
-    command: bash -c "cd frontend && npm run serve"
+    command: bash -c "cd frontend && npm install && npm run serve"
     depends_on:
       - web
 
