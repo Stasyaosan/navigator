@@ -10,3 +10,7 @@
 ```bash
 docker-compose build
 docker-compose up
+```
+### Выполнение задач по рассписанию с библиотекой celery
+Для работы с celery требуется redis  
+Настройки сelery и redis находятся в конце файла /navigator/settings.py
